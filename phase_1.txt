@@ -1,0 +1,16 @@
+Welcome to the Enigma Debugger!
+The system is locked, and a hidden phrase is the key to unlocking it.
+
+Rules:
+1. Use the debugger to analyze assembly and memory.
+2. Decipher the hidden phrase using clues.
+3. Enter the correct phrase to unlock the system.
+
+Commands Available:
+1. disas [function] - Disassemble a function.
+2. inspect memory [address] - Inspect memory contents.
+3. enter phrase [your_input] - Test your solution.
+
+Hints:
+- Some memory addresses are decoys.
+- The phrase is encoded and must be interpreted.
