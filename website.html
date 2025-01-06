@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Character Hover Effect</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .image-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .background-image {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: auto;
+      max-height: 100vh;
+      object-fit: contain;
+      z-index: -1;
+      transition: filter 0.3s ease;
+    }
+
+    .character {
+      position: absolute;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .character img {
+      width: 100%;
+      height: auto;
+    }
+
+    .description-box {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 200px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .character:hover .description-box {
+      opacity: 1;
+    }
+
+    .blurred {
+      filter: blur(5px);
+    }
+
+    .dimmed {
+      opacity: 0.2;
+    }
+
+    /* Hover effect: grow character slightly */
+    .character:hover {
+      transform: scale(1.1); /* Grows the character by 10% */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="image-container">
+    <img src="PluffyEE_Refsheet.png" alt="Background" class="background-image" />
+
+    <!-- Character placeholders -->
+    <div class="character" id="character1">
+      <img src="1.png" alt="Character 1" />
+      <div class="description-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Character 1</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Description for Character 1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="character" id="character2">
+      <img src="2.png" alt="Character 2" />
+      <div class="description-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Character 2</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Description for Character 2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="character" id="character3">
+      <img src="3.png" alt="Character 3" />
+      <div class="description-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Character 3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Description for Character 3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="character" id="character4">
+      <img src="4.png" alt="Character 4" />
+      <div class="description-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Character 4</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Description for Character 4</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration for character positions and sizes
+    const characterConfigs = [
+      {
+        id: 'character1',
+        x: 33,
+        y: 160,
+        width: 402,
+        height: 459
+      },
+      {
+        id: 'character2',
+        x: 433,
+        y: 150,
+        width: 432,
+        height: 459
+      },
+      {
+        id: 'character3',
+        x: 840,
+        y: 295,
+        width: 392,
+        height: 455
+      },
+      {
+        id: 'character4',
+        x: 1105,
+        y: 127,
+        width: 283,
+        height: 295
+      }
+    ];
+
+    // Apply configurations to set position and size
+    function setCharacterProperties(config) {
+      const character = document.getElementById(config.id);
+      if (character) {
+        character.style.left = `${config.x}px`;
+        character.style.top = `${config.y}px`;
+        character.style.width = `${config.width}px`;
+        character.style.height = `${config.height}px`;
+      }
+    }
+
+    // Get all characters and the background
+    const characters = document.querySelectorAll('.character');
+    const backgroundImage = document.querySelector('.background-image');
+
+    characters.forEach(character => {
+      character.addEventListener('mouseenter', () => {
+        // Blur background
+        backgroundImage.classList.add('blurred');
+
+        // Dim other characters
+        characters.forEach(otherCharacter => {
+          if (otherCharacter !== character) {
+            otherCharacter.classList.add('dimmed');
+          }
+        });
+      });
+
+      character.addEventListener('mouseleave', () => {
+        // Remove blur from background
+        backgroundImage.classList.remove('blurred');
+
+        // Remove dimming from all characters
+        characters.forEach(otherCharacter => {
+          otherCharacter.classList.remove('dimmed');
+        });
+      });
+    });
+
+    // Apply configurations to characters
+    characterConfigs.forEach(setCharacterProperties);
+  </script>
+
+</body>
+</html>
