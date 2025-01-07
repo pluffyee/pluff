@@ -73,7 +73,7 @@ body {
 .directory-tree {
     background-color: #222;
     color: #eee;
-    padding: 5px;
+    padding: 15px;
     border-bottom: 1px solid #333;
 }
 
@@ -107,31 +107,87 @@ body {
 }
 .image-viewer {
     position: absolute;
-    top: 50px;
-    left: 50px;
-    width: 300px;
-    height: auto;
-    background-color: #333;
-    border: 1px solid #888;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-}
-.image-viewer .title-bar {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    border: 2px solid #444;
+    border-radius: 5px;
     background-color: #222;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.image-viewer .title-bar {
+    background-color: #333;
     color: #fff;
-    padding: 5px;
+    padding: 8px;
     cursor: move;
-    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.image-viewer img {
-    width: 100%;
-    height: auto;
-}
-.image-viewer .close-btn {
-    float: right;
-    color: #fff;
-    border: none;
-    background: none;
+
+.image-viewer .close-button {
+    color: red;
     cursor: pointer;
+    font-size: 18px;
 }
+
+.image-viewer img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+  .main-content {
+    border: 1px solid #333;
+    padding: 20px;
+    background: rgba(0,0,0,0.3);
+  }
+  .ascii-art {
+    color: #00ff00;
+    white-space: pre;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 20px;
+    border: 1px solid #333;
+    background: rgba(0,0,0,0.3);
+  }
+  .header {
+    color: #0099ff;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+  }
+  .section {
+    margin-bottom: 2px;
+  }
+  .label {
+    color: #ff9900;
+    display: inline-block;
+    width: 120px;
+  }
+  .warning {
+    color: #ff0000;
+  }
+  .success {
+    color: #00ff00;
+  }
+  .info {
+    color: #0099ff;
+  }
+  .divider {
+    border-top: 1px dashed #333;
+    margin: 3px 0;
+  }
 

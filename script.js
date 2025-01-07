@@ -1,11 +1,10 @@
-// Sample folder structure
 const folderStructure = {
     "Home": {
-        "douments": ["file1.txt", "file2.txt"],
-        "pictures": ["image1.png", "image2.jpg"],
+        "about_me": ["file1.txt", "file2.txt"],
         "rythm": ["notes.txt"],
-        "mystery": ["assembly_puzzle.js"], // New puzzle file
-        "donottouch": ["phase_1.txt", "decode_and_compare.txt", "decode.txt"]
+        "puzzle1": ["assembly_puzzle.js"], // New puzzle file
+        "puzzle2": {}, // New directory for the vault game
+        "donottouch": {}
     },
     "documents": {
         "file1.txt": null,
@@ -14,7 +13,7 @@ const folderStructure = {
     "desktop": {
         "notes.txt": null
     },
-    "mystery": {
+    "puzzle1": {
         "clue1.txt": null,
         "clue2.txt": null
     }
@@ -26,8 +25,6 @@ const decoyAddresses = {
     0x403310: "Nothing here but shadows.",
     0x403320: "Wrong path leads to failure.",
 };
-
-const shiftValue = 5; // Caesar cipher shift
 let decodedPhrase = "A wolf-dog hides in plain sight";
 let isPuzzleSolved = false;
 let welcomeMessageDisplayed = false;
@@ -54,9 +51,9 @@ function handleAssemblyPuzzleCommand(command, output) {
         welcomeMessageDisplayed = true;
     }
 
-    if (command === "disas puzzle_logic") {
+    if (command === "disas puzzle1") {
         output.innerHTML += `<p>Disassembling function: puzzle_logic...</p>`;
-        output.innerHTML += `<p>0x400ef4 <+4>: mov rdi, encoded_phrase</p>`;
+        output.innerHTML += `<p>0x400ef4 <+4>: mov rdi, 0x403300</p>`;
         output.innerHTML += `<p>0x400ef9 <+9>: call decode</p>`;
         output.innerHTML += `<p>0x400f00 <+16>: call strcmp</p>`;
     } else if (command === "disas decode") {
@@ -71,7 +68,7 @@ function handleAssemblyPuzzleCommand(command, output) {
         // Convert the address to a number for comparison
         const addressNumber = parseInt(address, 16);
 
-        if (address === "encoded_phrase") {
+        if (addressNumber === encodedPhraseAddress) {
             output.innerHTML += `<p>Memory at 0x${encodedPhraseAddress.toString(16)}: "${encodedPhrase}"</p>`;
         } else if (decoyAddresses[addressNumber]) {
             output.innerHTML += `<p>${decoyAddresses[addressNumber]}</p>`;
@@ -82,7 +79,7 @@ function handleAssemblyPuzzleCommand(command, output) {
         const inputPhrase = command.split(" ").slice(2).join(" ");
         if (inputPhrase === decodedPhrase) {
             isPuzzleSolved = true;
-            output.innerHTML += `<p><strong>System Unlocked!</strong> You've solved the puzzle.</p>`;
+            output.innerHTML += `<p><strong>System Unlocked!</strong> You've solved the puzzle. Here is the 1st half: 1jbq-38RlArQ93nFoO</p>`;
         } else {
             output.innerHTML += `<p><strong>BOOM!</strong> You chose the wrong path.</p>`;
         }
@@ -96,6 +93,113 @@ function handleAssemblyPuzzleCommand(command, output) {
 let inPuzzleMode = false; // Flag to indicate if we are in puzzle mode
 
 
+
+
+
+//Game2
+let inVaultGame = false; // Flag to indicate if we are in the vault game
+const vaults = [1, 2, 3]; // Vaults available
+let keyLocation; // Where the key is located
+let userChoice; // User's initial choice
+let revealedVault; // Vault that is revealed to be empty
+let finalChoice; // User's final choice after switching
+let switchChoice; // To track if the user wants to switch
+let isGameOver = false; // Flag to indicate if the game is over
+
+function startVaultGame(output) {
+    // Randomly select the vault that contains the key (1, 2, or 3)
+    keyLocation = vaults[Math.floor(Math.random() * vaults.length)];
+    
+    output.innerHTML += `<p>Welcome to the Vault Challenge!</p>`;
+    output.innerHTML += `<p>Three vaults: 0x001, 0x002, 0x003. One contains the key.</p>`;
+    output.innerHTML += `<p>Enter your initial vault choice (1-3):</p>`;
+    inVaultGame = true; // Set the flag to indicate the vault game is active
+}
+
+function calculateReveal(output) {
+    // Reveal a vault that is not the player's choice and does not contain the key
+    revealedVault = vaults.find(vault => vault !== userChoice && vault !== keyLocation);
+    output.innerHTML += `<p>I'll reveal an empty vault for you... Vault ${revealedVault} is empty.</p>`;
+    offerSwitch(output); // Prompt the user to switch or stay
+}
+
+function offerSwitch(output) {
+    output.innerHTML += `<p>Would you like to switch your choice? (1 for yes, 0 for no):</p>`;
+    switchChoice = true; // Indicate that the game is waiting for a switch decision
+}
+
+
+
+function processSwitch(choice, output) {
+    const switchDecision = parseInt(choice);
+
+    if (switchDecision === 1) {
+        // Player chooses to switch
+        finalChoice = vaults.find(vault => vault !== userChoice && vault !== revealedVault);
+        output.innerHTML += `<p>You switched to vault ${finalChoice}.</p>`;
+    } else if (switchDecision === 0) {
+        // Player chooses not to switch
+        finalChoice = userChoice;
+        output.innerHTML += `<p>You kept your choice of vault ${finalChoice}.</p>`;
+    } else {
+        output.innerHTML += `<p>Invalid input. Please enter 1 for yes or 0 for no.</p>`;
+        return; // Exit without progressing
+    }
+
+    checkWin(output); // Determine if the player won or lost
+}
+
+function checkWin(output) {
+    if (finalChoice === keyLocation) {
+        output.innerHTML += `<p>Congratulations! You found the key! Here is the 2nd half: fIDZr90Ab3JWZoG</p>`;
+    } else {
+        output.innerHTML += `<p>Sorry! The vault was empty.</p>`;
+    }
+    resetGame(); // Reset the game state after completion
+}
+
+function makeChoice(choice, output) {
+    if (isGameOver) {
+        output.innerHTML += `<p>The game is already over. Please restart to play again.</p>`;
+        return;
+    }
+
+    if (!switchChoice) {
+        // Initial choice
+        userChoice = parseInt(choice);
+        if (!vaults.includes(userChoice)) {
+            output.innerHTML += `<p>Invalid choice. Please choose a vault (1-3).</p>`;
+            return;
+        }
+
+        output.innerHTML += `<p>You chose vault ${userChoice}.</p>`;
+        calculateReveal(output); // Reveal an empty vault
+    } else {
+        // Process switch choice
+        processSwitch(choice, output); // Decide whether to switch or not
+    }
+}
+function resetGame(output) {
+    isGameOver = false; // Reset to false instead of true
+    inVaultGame = false;
+    switchChoice = undefined;
+    userChoice = undefined;
+    finalChoice = undefined;
+    revealedVault = undefined;
+    keyLocation = undefined;
+
+    output.innerHTML += `<p>Game over. Exiting back to Home directory...</p>`;
+    currentPath = ["Home"];
+    updatePrompt();
+    updateDirectoryTree();
+}
+
+
+
+
+
+//end game 2
+
 function handleCommand(command) {
     const output = document.querySelector('.output');
     const sanitizedCommand = command.trim();
@@ -107,9 +211,15 @@ function handleCommand(command) {
         listFiles(output);
     } else if (sanitizedCommand.startsWith('cd ')) {
         changeDirectory(sanitizedCommand.split(' ')[1], output);
-    } else if (sanitizedCommand === 'disas puzzle_logic') {
+    } else if (sanitizedCommand === 'disas puzzle1') {
         inPuzzleMode = true; // Enter puzzle mode
-        handleAssemblyPuzzleCommand(sanitizedCommand, output);
+        handleAssemblyPuzzleCommand('disas puzzle1', output);
+    } else if (inVaultGame) {
+        // Handle vault game input
+        makeChoice(sanitizedCommand, output); // Process the vault choice
+    } else if (isGameOver) {
+        output.innerHTML += `<p>Unknown command: ${sanitizedCommand}</p>`;
+        output.innerHTML += `<p>Game has ended. Use <strong>cd ..</strong> to navigate or <strong>ls</strong> to explore.</p>`;
     } else if (inPuzzleMode) {
         if (sanitizedCommand === 'exit') {
             inPuzzleMode = false; // Exit puzzle mode
@@ -145,122 +255,59 @@ function listFiles(output) {
     }
 }
 
-// Function to change directory
-// Function to open an image viewer
-function openImageViewer(imagePath) {
-    // Create a container for the image viewer
-    const imageViewer = document.createElement('div');
-    imageViewer.className = 'image-viewer';
-    imageViewer.style.position = 'absolute';
-    imageViewer.style.top = '50px';
-    imageViewer.style.left = '50px';
-    imageViewer.style.width = '300px';
-    imageViewer.style.height = 'auto';
-    imageViewer.style.backgroundColor = '#333';
-    imageViewer.style.border = '1px solid #888';
-    imageViewer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-    imageViewer.style.zIndex = 1000;
-
-    // Add title bar
-    const titleBar = document.createElement('div');
-    titleBar.className = 'title-bar';
-    titleBar.style.backgroundColor = '#222';
-    titleBar.style.color = '#fff';
-    titleBar.style.padding = '5px';
-    titleBar.style.cursor = 'move';
-    titleBar.style.fontSize = '14px';
-    titleBar.innerHTML = `<span>${imagePath}</span> <button class="close-btn" style="float: right; color: #fff;">X</button>`;
-    imageViewer.appendChild(titleBar);
-
-    // Add the image element
-    const imageElement = document.createElement('img');
-    imageElement.src = `assets/${imagePath}`; // Use your asset path
-    imageElement.style.width = '100%';
-    imageElement.style.height = 'auto';
-    imageElement.alt = imagePath;
-    imageViewer.appendChild(imageElement);
-
-    // Add the image viewer to the body
-    document.body.appendChild(imageViewer);
-
-    // Make the image viewer draggable
-    dragElement(imageViewer);
-
-    // Close functionality
-    const closeButton = titleBar.querySelector('.close-btn');
-    closeButton.addEventListener('click', () => {
-        imageViewer.remove();
-    });
-}
-
-// Update the changeDirectory function to handle image files
 
 function changeDirectory(dir, output) {
+    // Get the current directory object
     const currentDir = currentPath.reduce((acc, d) => acc[d], folderStructure);
-
-    if (currentDir[dir]) {
-        // Navigate to directory
-        currentPath.push(dir);
-        output.innerHTML += `<p>Changed directory to ${currentPath.join('\\')}</p>`;
-        updatePrompt();
-        updateDirectoryTree();
-    } else if (Array.isArray(currentDir) && currentDir.includes(dir)) {
-        // Open file
-        const fileExtension = dir.split('.').pop().toLowerCase();
-        if (['png', 'jpg', 'jpeg', 'gif'].includes(fileExtension)) {
-            openImageFile(dir);
-        } else {
-            output.innerHTML += `<p>${dir} is not a directory and cannot be opened.</p>`;
-        }
-    } else if (dir === '..') {
-        // Navigate to parent directory
+    
+    // Handle directory navigation
+    if (dir === '..') {
         if (currentPath.length > 1) {
             currentPath.pop();
             output.innerHTML += `<p>Changed directory to ${currentPath.join('\\')}</p>`;
-            updatePrompt();
-            updateDirectoryTree();
         } else {
             output.innerHTML += `<p>You are already at the root directory.</p>`;
         }
-    } else {
-        output.innerHTML += `<p>No such directory or file: ${dir}</p>`;
+        return;
     }
-}
-function changeDirectory(dir, output) {
-    const currentDir = currentPath.reduce((acc, d) => acc[d], folderStructure);
-    if (currentDir[dir]) {
+    if (dir === 'about_me') {
+        displayAboutMe(output); // Render the about_me profile
+        return;
+    }
+    // Check if the target is a directory
+    if (currentDir[dir] && typeof currentDir[dir] === 'object') {
         currentPath.push(dir);
         output.innerHTML += `<p>Changed directory to ${currentPath.join('\\')}</p>`;
-        if (dir === "mystery") {
-            output.innerHTML += `<p>Type <strong>disas puzzle_logic</strong> to continue.</p>`;
-        }
+        
+        // Special directory handling
+        if (dir === "puzzle1") {
+            output.innerHTML += `<p>Type <strong>disas puzzle1</strong> to continue.</p>`;
 
-        if (dir === "rythm") {
+        } if (dir === "puzzle2") {
+        // Reset all game states when entering puzzle2
+            isGameOver = false;
+            inVaultGame = false;
+            switchChoice = undefined;
+            userChoice = undefined;
+            finalChoice = undefined;
+            revealedVault = undefined;
+            keyLocation = undefined;
+        
+        // Then start the game
+            startVaultGame(output);
+        } else if (dir === "rythm") {
             output.innerHTML += `<p>The answer's locked in numbers' hold,</p>`;
             output.innerHTML += `<p>Hex is the key, let truth unfold.</p>`;
             output.innerHTML += `<p>XOR the bytes to break the seal,</p>`;
             output.innerHTML += `<p>Decode the phrase, the code reveal.</p>`;
+        } else if (dir === "donottouch") {
+            output.innerHTML += `<p><strong>Access granted! Here's your link: <p>https://drive.google.com/file/d/[1st-half][2nd-half]//view?usp=sharing</p></strong></p>`;
         }
-    } else if (currentDir[dir] === null) {
-        // Handle file case
-        const fileExtension = dir.split('.').pop().toLowerCase();
-        if (['png', 'jpg', 'jpeg', 'gif'].includes(fileExtension)) {
-            openImageViewer(dir); // Open image viewer for images
-        } else {
-            output.innerHTML += `<p>Cannot open file: ${dir}</p>`;
-        }
-    } else if (dir === '..') {
-        if (currentPath.length > 1) {
-            currentPath.pop(); // Go back to the previous directory
-            output.innerHTML += `<p>Changed directory to ${currentPath.join('\\')}</p>`;
-        } else {
-            output.innerHTML += `<p>You are already at the root directory.</p>`;
-        }
-    } else {
-        output.innerHTML += `<p>No such directory: ${dir}</p>`;
+        return;
     }
+    
+    output.innerHTML += `<p>No such directory or file: ${dir}</p>`;
 }
-
 
 
 
@@ -275,10 +322,7 @@ function updatePrompt() {
 function updateDirectoryTree() {
     const directoryTree = document.getElementById('directory-tree');
     directoryTree.innerHTML = `Current Directory: ${currentPath.join('\\')} <br>`;
-
-    // Create a pointer to show where we are
-    const pointer = '→';
-    directoryTree.innerHTML += `${pointer} ${currentPath[currentPath.length - 1]}`;
+    directoryTree.innerHTML = `<strong> "ls"</strong> to search the directory. "cd [foldername]"</strong> to enter a folder. "cd .."</strong> to exit a folder.`;
 }
 
 // Initialize the game
@@ -330,70 +374,137 @@ closeButton.addEventListener('click', toggleTerminal);
 // Make the terminal window draggable
 dragElement(terminalWindow);
 
-// Make any element draggable
+function displayAboutMe(output) {
+    const aboutMeHTML = `
+        <div class="container">
+            <div class="main-content">
+                <div class="header">
+                    <span class="prompt">root@pluffyee-system:~$</span> ./display_profile.sh
+                </div>
+                <div class="section">
+                    <div><span class="label">User:</span> Pluffyee</div>
+                    <div><span class="label">Race:</span> Wolf (babyfur) <span class="warning">[!] Don't look it up</span></div>
+                    <div><span class="label">DoB:</span> 09/01/2002</div>
+                    <div><span class="label">Furry Age:</span> 2 years</div>
+                    <div><span class="label">Location:</span> Houston, TX (Ex-VIP District 12, HCMC)</div>
+                    <div><span class="label">Ocp:</span> MSc in Data Science in Georgia Tech</div>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div><span class="label">Hobbies:</span> Furry socializing, Photography, Cooking</div>
+                    <div><span class="label">Dreams:</span> Acquiring PhD. MS. titles</div>
+                    <div><span class="label">Shows:</span> TAWOG, ATLA, Family Guy, Bluey</div>
+                    <div><span class="label">Fun Fact:</span> Ex-admin of Viettoons (Family Guy subber)</div>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="info">FURRY STATUS:</div>
+                    <div>• Full suit owned ✓</div>
+                    <div>• Future: Commissioning Digitigrade Fursuit</div>
+                    <div>• Cons: Midwest Furfest (Dec), Anthrocon, FWA (May)</div>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="success">CONTACT INFO:</div>
+                    <div>• Open for new friends 24/7</div>
+                    <div>• Languages: 🇻🇳 Vietnamese | 🇺🇸 English </div>
+                    <div>• Timezone: US Central (active until 9 PM)</div>
+                </div>
+            </div>
+            <div class="ascii-art">
+                   ,ood8888booo,
+                  ,od8           8bo,
+               ,od                   bo,
+             ,d8                       8b,
+            ,o                           o,    ,a8b
+           ,8                             8,,od8  8
+           8'                             d8'     8b
+           8                           d8'ba     aP'
+           Y,                       o8'         aP'
+            Y8,                      YaaaP'    ba
+             Y8o                   Y8'         88
+              Y8               ,8"           P
+                Y8o        ,d8P'              ba
+           ooood8888888P"""'                  P'
+        ,od                                  8
+     ,dP     o88o                           o'
+    ,dP          8                          8
+   ,d'   oo       8                       ,8
+   $    d$"8      8           Y    Y  o   8
+  d    d  d8    od  ""boooooooob   d"" 8   8
+  $    8  d   ood' ,   8        b  8   '8  b
+  $   $  8  8     d  d8        b  d    '8  b
+   $  $ 8   b    Y  d8          8 ,P     '8  b
+   $$  Yb  b     8b 8b         8 8,      '8  o,
+        Y  b      8o  $$o      d  b        b   $o
+         8   $     8$,,$"      $   $o      '$o$$
+          $o$$P"                 $$o$
+
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠻⣥⠙⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡿⠀⡿⠻⣆⠙⠦⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⡄⠁⠀⠘⣆⡔⢶⣆⠉⢷⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⡄⠀⠀⡿⢿⡀⠉⠀⠞⠹⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡿⡄⠀⡇⠘⣧⣀⣀⣀⠀⠻⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣼⠃⠁⢀⣠⠞⣹⢿⠻⡟⢿⣿⣯⢳⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⠃⠶⠒⠉⠁⣴⠇⢸⡇⡟⡷⢬⡙⠎⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⠇⢀⣠⣄⡀⠚⠁⠀⠈⠀⠀⣷⠀⠉⠛⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⡼⣽⣿⣶⠋⢉⡿⠇⠀⠀⠀⠀⠀⣰⣿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⢱⣿⣿⠇⠀⣠⣥⣤⡀⠀⠀⠀⢀⡟⣿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⢿⣿⢀⣾⡟⠉⢹⡇⠀⠀⠀⢸⠁⡿⠙⣿⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⢸⣇⣾⡟⠀⠸⡏⣄⡀⠀⠀⢹⢀⡇⢀⢘⢿⣮⡙⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣇⠀⡀⣧⠰⣿⣶⣄⠀⠀⠀⠘⣎⠳⣿⣿⣦⡀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡿⣿⣆⠹⣿⡐⣾⣷⣹⣆⠀⠀⠀⠘⢷⣄⣻⣿⣿⣷⡄⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⢿⣿⣦⠽⣇⣹⣟⢿⠙⠁⠀⠀⠀⣤⠉⠻⣿⣿⣿⣿⣦⡀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠙⡟⠂⣿⢹⡿⣼⠇⠀⠀⣀⠀⣷⡀⠀⠈⠻⣿⣿⣿⣷⡀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⡆⢻⠀⠉⢸⡇⠈⣀⣠⣾⠇⠀⠻⣿⣦⣤⣴⣿⠿⣿⡿⣷⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⡇⢸⡀⠀⢸⠁⣰⠛⣽⡧⠖⠻⢿⡆⠈⠉⠉⠀⠀⢻⣷⠹⠇
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠘⡇⠀⢸⢰⡏⢰⡟⠀⣀⣀⡼⠃⠀⢀⡆⠀⠀⠘⣿⡆⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣴⣿⣶⣷⣶⣾⣿⣧⣾⣤⣄⣀⣀⣤⣤⣶⡿⠀⠀⠀⢠⣿⡇⠀
+⠀⠀⠀⠀⠀⠀⠀⣠⣴⣾⣿⣟⡛⠛⠛⠉⠉⠉⠉⢉⣭⣽⡿⠿⠿⠿⠛⠛⠛⠓⠲⠦⠄⣼⢻⡇⠀
+⠀⠀⠀⠀⠀⠀⠘⢉⣼⣿⣿⠿⠛⠛⠁⠀⠀⣠⠖⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠁⣸⡇⠀
+⠀⠀⠀⠀⠀⢀⣴⠿⠛⠁⢀⣀⣀⣀⣀⣀⣄⡀⠀⠀⠀⢦⣀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠇⣰⣿⠁⠀
+⠀⠀⠀⢀⣴⣟⣥⣶⣾⣿⣿⣿⣿⣿⣿⣭⣤⣤⣤⣀⣀⡀⠈⠛⠶⢶⣶⣶⣶⣾⣿⣿⣿⠟⠁⠀⠀
+⠀⢀⣴⡿⠟⠋⡽⠟⠉⠉⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠙⠛⠛⠛⠿⠿⠿⠿⠟⠛⠉⠁⠀⠀⠀⠀
+⠐⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+            </div>
+        </div>`;
+    output.innerHTML = aboutMeHTML; // Replace the output with the about_me HTML
+}
+
+// Add this function to handle dragging elements
 function dragElement(elmnt) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
-    // If the user clicks on the title bar, initiate dragging
     const titleBar = elmnt.querySelector('.title-bar');
-    titleBar.onmousedown = dragMouseDown;
+    if (titleBar) {
+        titleBar.onmousedown = dragMouseDown;
+    }
 
     function dragMouseDown(e) {
         e = e || window.event;
         e.preventDefault();
-        // Get the mouse cursor position at startup
         pos3 = e.clientX;
         pos4 = e.clientY;
         document.onmouseup = closeDragElement;
-        // Call a function whenever the cursor moves
         document.onmousemove = elementDrag;
     }
 
     function elementDrag(e) {
         e = e || window.event;
         e.preventDefault();
-        // Calculate the new cursor position
         pos1 = pos3 - e.clientX;
         pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        // Set the element's new position
         elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }
 
     function closeDragElement() {
-        // Stop moving when mouse button is released
         document.onmouseup = null;
         document.onmousemove = null;
     }
 }
-function openImageFile(fileName) {
-    const imgWindow = document.createElement('div');
-    imgWindow.classList.add('image-window');
-    imgWindow.style.position = 'absolute';
-    imgWindow.style.top = '100px';
-    imgWindow.style.left = '100px';
-    imgWindow.style.border = '2px solid #000';
-    imgWindow.style.backgroundColor = '#fff';
-    imgWindow.style.boxShadow = '0px 4px 6px rgba(0,0,0,0.1)';
-    imgWindow.style.zIndex = '1000';
 
-    const closeButton = document.createElement('button');
-    closeButton.textContent = 'Close';
-    closeButton.style.position = 'absolute';
-    closeButton.style.top = '5px';
-    closeButton.style.right = '5px';
-    closeButton.onclick = () => imgWindow.remove();
-
-    const imgElement = document.createElement('img');
-    imgElement.src = `images/${fileName}`; // Replace with the actual file path
-    imgElement.style.maxWidth = '400px';
-    imgElement.style.maxHeight = '300px';
-
-    imgWindow.appendChild(closeButton);
-    imgWindow.appendChild(imgElement);
-    document.body.appendChild(imgWindow);
-}
-// Initialize the terminal window to be hidden
 terminalWindow.style.display = 'none';
