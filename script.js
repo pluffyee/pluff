@@ -301,7 +301,7 @@ function changeDirectory(dir, output) {
             output.innerHTML += `<p>XOR the bytes to break the seal,</p>`;
             output.innerHTML += `<p>Decode the phrase, the code reveal.</p>`;
         } else if (dir === "donottouch") {
-            output.innerHTML += `<p><strong>Access granted! Here's your link: <p>https://drive.google.com/file/d/[1st-half][2nd-half]//view?usp=sharing</p></strong></p>`;
+            output.innerHTML += `<p><strong>Access granted! Here's your link: <p>https://drive.google.com/file/d/[1st-half][2nd-half]/view?usp=sharing</p></strong></p>`;
         }
         return;
     }
